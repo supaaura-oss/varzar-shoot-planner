@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VARZAR Shoot Planner</title>
+    <meta name="theme-color" content="#272723" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VARZAR Shoot" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest?v=2" />
+    <link rel="icon" href="icon.svg?v=2" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon.svg?v=2" />
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-mark">
+          <span>VARZAR</span>
+          <small>Bag Shoot Planner</small>
+        </div>
+
+        <nav class="nav-tabs" aria-label="보기 전환">
+          <a class="nav-tab active" href="#dashboardView" data-view="dashboard">촬영 현황</a>
+          <a class="nav-tab" href="#productsView" data-view="products">제품 관리</a>
+          <a class="nav-tab" href="#shotsView" data-view="shots">컷 리스트</a>
+          <a class="nav-tab" href="#notesView" data-view="notes">촬영 노트</a>
+        </nav>
+
+        <div class="shoot-date">
+          <label for="shootDate">촬영일</label>
+          <input id="shootDate" type="date" />
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <p class="eyebrow">New Bag Line Launch</p>
+            <h1>바잘 가방 촬영 준비 보드</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="exportCsv" class="ghost-button">CSV 내보내기</button>
+            <button id="exportBackup" class="ghost-button">작업 백업</button>
+            <button id="importBackup" class="ghost-button">백업 불러오기</button>
+            <input id="backupFile" type="file" accept="application/json,.json" hidden />
+            <button id="resetDemo" class="ghost-button">기본 리스트 불러오기</button>
+          </div>
+        </section>
+
+        <section id="dashboardView" class="view active">
+          <div class="metric-grid">
+            <article class="metric-card">
+              <span>등록 제품</span>
+              <strong id="totalProducts">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>전체 컷</span>
+              <strong id="totalShots">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>완료 컷</span>
+              <strong id="doneShots">0</strong>
+            </article>
+            <article class="metric-card accent">
+              <span>진행률</span>
+              <strong id="progressText">0%</strong>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>촬영 진행률</h2>
+                <span id="remainingText">남은 컷 0개</span>
+              </div>
+              <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+              </div>
+              <div id="priorityList" class="priority-list"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>오늘 체크</h2>
+                <span>현장 준비</span>
+              </div>
+              <div class="checklist">
+                <label><input type="checkbox" data-check="samples" /> 샘플/컬러 전량 준비</label>
+                <label><input type="checkbox" data-check="styling" /> 착장 및 소품 확인</label>
+                <label><input type="checkbox" data-check="detail" /> 디테일 컷 우선순위 확인</label>
+                <label><input type="checkbox" data-check="sns" /> 릴스/숏폼 컷 별도 체크</label>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="productsView" class="view">
+          <form id="productForm" class="editor-form">
+            <div class="form-row">
+              <label>제품명<input name="name" required placeholder="예: VA 스터드 미니 백 블랙" /></label>
+              <label>컬러<input name="color" placeholder="블랙" /></label>
+              <label>우선순위
+                <select name="priority">
+                  <option>높음</option>
+                  <option>보통</option>
+                  <option>낮음</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>핵심 포인트<input name="point" placeholder="수납, 스트랩, 로고 장식 등" /></label>
+              <label>스타일링<input name="styling" placeholder="데님 셋업, 미니멀 룩 등" /></label>
+              <button type="submit" class="primary-button">제품 추가</button>
+            </div>
+          </form>
+
+          <div id="productList" class="table-list"></div>
+        </section>
+
+        <section id="shotsView" class="view">
+          <form id="shotForm" class="editor-form">
+            <div class="form-row">
+              <label>제품
+                <select name="productId" id="shotProduct"></select>
+              </label>
+              <label>컷 타입
+                <select name="type">
+                  <option>착용 컷</option>
+                  <option>디테일 컷</option>
+                  <option>누끼 컷</option>
+                  <option>무드 컷</option>
+                  <option>릴스 컷</option>
+                </select>
+              </label>
+              <label>장면<input name="scene" placeholder="정면 착용, 내부 수납, 체인 클로즈업" /></label>
+              <button type="submit" class="primary-button">컷 추가</button>
+            </div>
+          </form>
+
+          <div id="shotList" class="shot-board"></div>
+        </section>
+
+        <section id="notesView" class="view">
+          <div class="notes-layout">
+            <label class="note-field">
+              촬영 콘셉트
+              <textarea id="conceptNote" rows="8" placeholder="이번 가방 라인의 촬영 무드와 키워드를 정리하세요."></textarea>
+            </label>
+            <label class="note-field">
+              현장 메모
+              <textarea id="fieldNote" rows="8" placeholder="준비물, 누락 컷, 모델/스튜디오 전달사항을 적어두세요."></textarea>
+            </label>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js?v=2"></script>
+  </body>
+</html>

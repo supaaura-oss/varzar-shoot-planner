@@ -1,0 +1,1844 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VARZAR Shoot Planner - Offline</title>
+    <meta name="theme-color" content="#272723" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VARZAR Shoot" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+:root {
+  color-scheme: light;
+  --ink: #1d1d1f;
+  --muted: #6c6c72;
+  --line: #dedbd4;
+  --paper: #fbfaf7;
+  --panel: #ffffff;
+  --charcoal: #242424;
+  --olive: #656f4f;
+  --clay: #b86b4b;
+  --sage: #dce3d2;
+  --soft: #f1eee8;
+  --danger: #b44444;
+  --shadow: 0 18px 40px rgba(38, 34, 28, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 20px;
+  background: #272723;
+  color: #f7f3ea;
+}
+
+.brand-mark {
+  display: grid;
+  gap: 6px;
+}
+
+.brand-mark span {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.brand-mark small,
+.shoot-date label,
+.eyebrow,
+.metric-card span,
+.panel-header span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sidebar .brand-mark small,
+.sidebar .shoot-date label {
+  color: #c9c2b5;
+}
+
+.nav-tabs {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-tab,
+.ghost-button,
+.primary-button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.nav-tab {
+  text-decoration: none;
+  width: 100%;
+  color: #f7f3ea;
+  background: transparent;
+  text-align: left;
+}
+
+.nav-tab.active {
+  background: #f7f3ea;
+  color: #242424;
+}
+
+.shoot-date {
+  margin-top: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.shoot-date input {
+  width: 100%;
+  border: 1px solid #45453f;
+  border-radius: 8px;
+  background: #1d1d1a;
+  color: #f7f3ea;
+  padding: 10px;
+}
+
+.workspace {
+  padding: 32px;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ghost-button {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.primary-button {
+  align-self: end;
+  background: var(--charcoal);
+  color: white;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.view:target {
+  display: block;
+}
+
+body:has(.view:target) .view.active:not(:target) {
+  display: none;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.metric-card,
+.panel,
+.editor-form,
+.table-row,
+.shot-card,
+.note-field {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.metric-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.metric-card strong {
+  font-size: 34px;
+}
+
+.metric-card.accent {
+  background: var(--sage);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 18px;
+}
+
+.panel {
+  padding: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.progress-track {
+  height: 16px;
+  overflow: hidden;
+  background: var(--soft);
+  border-radius: 999px;
+}
+
+.progress-bar {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--olive), var(--clay));
+  transition: width 180ms ease;
+}
+
+.priority-list,
+.table-list,
+.shot-board {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.priority-item,
+.table-row,
+.shot-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.priority-item {
+  border-left: 4px solid var(--olive);
+  background: var(--soft);
+}
+
+.priority-item.high {
+  border-color: var(--clay);
+}
+
+.checklist {
+  display: grid;
+  gap: 14px;
+}
+
+.checklist label,
+.shot-card label,
+.inline-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.inline-check {
+  width: fit-content;
+  min-height: 34px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.inline-check input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
+
+.editor-form {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 11px 12px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 190px;
+}
+
+.table-row {
+  grid-template-columns: minmax(190px, 1fr) 110px 100px 120px minmax(160px, 1fr) 104px;
+  align-items: center;
+}
+
+.table-row.edit-row {
+  grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(110px, 0.6fr) minmax(100px, 0.55fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) 120px auto;
+}
+
+.table-row.shoot-done {
+  background: #ececea;
+  color: #77756f;
+  box-shadow: none;
+}
+
+.table-row:has(.inline-check input:checked) {
+  background: #ececea;
+  color: #77756f;
+  box-shadow: none;
+}
+
+.table-row.shoot-done .row-title,
+.table-row.shoot-done .row-sub,
+.table-row.shoot-done .inline-check,
+.table-row:has(.inline-check input:checked) .row-title,
+.table-row:has(.inline-check input:checked) .row-sub,
+.table-row:has(.inline-check input:checked) .inline-check {
+  color: #77756f;
+}
+
+.table-row.shoot-done .tag,
+.table-row:has(.inline-check input:checked) .tag {
+  background: #deddd8;
+  color: #77756f;
+}
+
+.row-title {
+  font-weight: 800;
+}
+
+.row-sub,
+.shot-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tag.high {
+  background: #f4d8cf;
+  color: #8d3d2f;
+}
+
+.delete-button,
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.delete-button {
+  color: var(--danger);
+}
+
+.icon-button {
+  color: var(--ink);
+}
+
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.small-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.small-button.dark {
+  border-color: var(--charcoal);
+  background: var(--charcoal);
+  color: white;
+}
+
+.shot-board {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shot-card.done {
+  opacity: 0.72;
+  background: #f3f6ef;
+}
+
+.shot-card.edit-shot {
+  opacity: 1;
+  background: var(--panel);
+}
+
+.shot-card strong {
+  line-height: 1.35;
+}
+
+.notes-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.note-field {
+  padding: 18px;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    gap: 18px;
+  }
+
+  .nav-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .nav-tab {
+    text-align: center;
+  }
+
+  .shoot-date {
+    margin-top: 0;
+  }
+
+  .metric-grid,
+  .dashboard-grid,
+  .notes-layout,
+  .shot-board {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row,
+  .table-row,
+  .table-row.edit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .workspace {
+    padding: 22px 16px;
+  }
+
+  .topbar {
+    display: grid;
+  }
+
+  .topbar-actions {
+    justify-content: stretch;
+  }
+
+  .topbar-actions button,
+  .primary-button {
+    width: 100%;
+  }
+
+  .nav-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-mark">
+          <span>VARZAR</span>
+          <small>Bag Shoot Planner</small>
+        </div>
+
+        <nav class="nav-tabs" aria-label="보기 전환">
+          <a class="nav-tab active" href="#dashboardView" data-view="dashboard">촬영 현황</a>
+          <a class="nav-tab" href="#productsView" data-view="products">제품 관리</a>
+          <a class="nav-tab" href="#shotsView" data-view="shots">컷 리스트</a>
+          <a class="nav-tab" href="#notesView" data-view="notes">촬영 노트</a>
+        </nav>
+
+        <div class="shoot-date">
+          <label for="shootDate">촬영일</label>
+          <input id="shootDate" type="date" />
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <p class="eyebrow">New Bag Line Launch</p>
+            <h1>바잘 가방 촬영 준비 보드</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="exportCsv" class="ghost-button">CSV 내보내기</button>
+            <button id="exportBackup" class="ghost-button">작업 백업</button>
+            <button id="importBackup" class="ghost-button">백업 불러오기</button>
+            <input id="backupFile" type="file" accept="application/json,.json" hidden />
+            <button id="resetDemo" class="ghost-button">기본 리스트 불러오기</button>
+          </div>
+        </section>
+
+        <section id="dashboardView" class="view active">
+          <div class="metric-grid">
+            <article class="metric-card">
+              <span>등록 제품</span>
+              <strong id="totalProducts">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>전체 컷</span>
+              <strong id="totalShots">0</strong>
+            </article>
+            <article class="metric-card">
+              <span>완료 컷</span>
+              <strong id="doneShots">0</strong>
+            </article>
+            <article class="metric-card accent">
+              <span>진행률</span>
+              <strong id="progressText">0%</strong>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h2>촬영 진행률</h2>
+                <span id="remainingText">남은 컷 0개</span>
+              </div>
+              <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+              </div>
+              <div id="priorityList" class="priority-list"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h2>오늘 체크</h2>
+                <span>현장 준비</span>
+              </div>
+              <div class="checklist">
+                <label><input type="checkbox" data-check="samples" /> 샘플/컬러 전량 준비</label>
+                <label><input type="checkbox" data-check="styling" /> 착장 및 소품 확인</label>
+                <label><input type="checkbox" data-check="detail" /> 디테일 컷 우선순위 확인</label>
+                <label><input type="checkbox" data-check="sns" /> 릴스/숏폼 컷 별도 체크</label>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="productsView" class="view">
+          <form id="productForm" class="editor-form">
+            <div class="form-row">
+              <label>제품명<input name="name" required placeholder="예: VA 스터드 미니 백 블랙" /></label>
+              <label>컬러<input name="color" placeholder="블랙" /></label>
+              <label>우선순위
+                <select name="priority">
+                  <option>높음</option>
+                  <option>보통</option>
+                  <option>낮음</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>핵심 포인트<input name="point" placeholder="수납, 스트랩, 로고 장식 등" /></label>
+              <label>스타일링<input name="styling" placeholder="데님 셋업, 미니멀 룩 등" /></label>
+              <button type="submit" class="primary-button">제품 추가</button>
+            </div>
+          </form>
+
+          <div id="productList" class="table-list">
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 미디움</div>
+            <div class="row-sub">Lune Velo Hobo Bag Medium</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" disabled>↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 미디움</div>
+            <div class="row-sub">Lune Velo Hobo Bag Medium</div>
+          </div>
+          <span>다크브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 미디움</div>
+            <div class="row-sub">Lune Velo Hobo Bag Medium</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 미디움</div>
+            <div class="row-sub">Lune Velo Hobo Bag Medium</div>
+          </div>
+          <span>아이보리</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 스몰</div>
+            <div class="row-sub">Lune Velo Hobo Bag Small</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 스몰</div>
+            <div class="row-sub">Lune Velo Hobo Bag Small</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 스몰</div>
+            <div class="row-sub">Lune Velo Hobo Bag Small</div>
+          </div>
+          <span>그레이</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 스몰</div>
+            <div class="row-sub">Lune Velo Hobo Bag Small</div>
+          </div>
+          <span>아이보리</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 라지</div>
+            <div class="row-sub">Lune Velo Hobo Bag Large</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">룬 벨로 호보백 라지</div>
+            <div class="row-sub">Lune Velo Hobo Bag Large</div>
+          </div>
+          <span>다크브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 스몰</div>
+            <div class="row-sub">Mirel Bucket Bag Small</div>
+          </div>
+          <span>아이보리</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 스몰</div>
+            <div class="row-sub">Mirel Bucket Bag Small</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 스몰</div>
+            <div class="row-sub">Mirel Bucket Bag Small</div>
+          </div>
+          <span>핑크</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 스몰</div>
+            <div class="row-sub">Mirel Bucket Bag Small</div>
+          </div>
+          <span>스카이블루</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 미디움</div>
+            <div class="row-sub">Mirel Bucket Bag Medium</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">미렐 버킷백 미디움</div>
+            <div class="row-sub">Mirel Bucket Bag Medium</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">셀레 드로우 스트링 백팩 미디움</div>
+            <div class="row-sub">Sele Drawstring Backpack Medium</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">셀레 드로우 스트링 백팩 미디움</div>
+            <div class="row-sub">Sele Drawstring Backpack Medium</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 미니</div>
+            <div class="row-sub">Senoir Flap Cross Bag Mini</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 미니</div>
+            <div class="row-sub">Senoir Flap Cross Bag Mini</div>
+          </div>
+          <span>아이보리</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 미니</div>
+            <div class="row-sub">Senoir Flap Cross Bag Mini</div>
+          </div>
+          <span>핑크</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 미니</div>
+            <div class="row-sub">Senoir Flap Cross Bag Mini</div>
+          </div>
+          <span>스카이블루</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 스몰</div>
+            <div class="row-sub">Senoir Flap Cross Bag Small</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 스몰</div>
+            <div class="row-sub">Senoir Flap Cross Bag Small</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">세누아 플랩 크로스백 스몰</div>
+            <div class="row-sub">Senoir Flap Cross Bag Small</div>
+          </div>
+          <span>아이보리</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">비나 숄더백 미디움</div>
+            <div class="row-sub">Vina Shoulder Bag Medium</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">비나 숄더백 미디움</div>
+            <div class="row-sub">Vina Shoulder Bag Medium</div>
+          </div>
+          <span>다크브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">비나 숄더백 미디움</div>
+            <div class="row-sub">Vina Shoulder Bag Medium</div>
+          </div>
+          <span>그레이</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">셀론 쇼퍼백 라지</div>
+            <div class="row-sub">Selon Shopper Bag Large</div>
+          </div>
+          <span>블랙</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">셀론 쇼퍼백 라지</div>
+            <div class="row-sub">Selon Shopper Bag Large</div>
+          </div>
+          <span>브라운</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" >↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+        <article class="table-row">
+          <div>
+            <div class="row-title">셀론 쇼퍼백 라지</div>
+            <div class="row-sub">Selon Shopper Bag Large</div>
+          </div>
+          <span>그레이</span>
+          <span class="tag high">높음</span>
+          <label class="inline-check"><input type="checkbox" /> 촬영완료</label>
+          <span class="row-sub"></span>
+          <div class="row-actions">
+            <button class="icon-button" >↑</button>
+            <button class="icon-button" disabled>↓</button>
+            <button class="small-button">수정</button>
+            <button class="delete-button">×</button>
+          </div>
+        </article>
+          </div>
+        </section>
+
+        <section id="shotsView" class="view">
+          <form id="shotForm" class="editor-form">
+            <div class="form-row">
+              <label>제품
+                <select name="productId" id="shotProduct"></select>
+              </label>
+              <label>컷 타입
+                <select name="type">
+                  <option>착용 컷</option>
+                  <option>디테일 컷</option>
+                  <option>누끼 컷</option>
+                  <option>무드 컷</option>
+                  <option>릴스 컷</option>
+                </select>
+              </label>
+              <label>장면<input name="scene" placeholder="정면 착용, 내부 수납, 체인 클로즈업" /></label>
+              <button type="submit" class="primary-button">컷 추가</button>
+            </div>
+          </form>
+
+          <div id="shotList" class="shot-board"></div>
+        </section>
+
+        <section id="notesView" class="view">
+          <div class="notes-layout">
+            <label class="note-field">
+              촬영 콘셉트
+              <textarea id="conceptNote" rows="8" placeholder="이번 가방 라인의 촬영 무드와 키워드를 정리하세요."></textarea>
+            </label>
+            <label class="note-field">
+              현장 메모
+              <textarea id="fieldNote" rows="8" placeholder="준비물, 누락 컷, 모델/스튜디오 전달사항을 적어두세요."></textarea>
+            </label>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+const storageKey = "varzar-shoot-planner-v2";
+const canUseSharedServer = false;
+
+const demoState = {
+  shootDate: "2026-05-15",
+  checks: {
+    samples: false,
+    styling: false,
+    detail: false,
+    sns: false,
+  },
+  notes: {
+    concept:
+      "바잘 모자 라인과 자연스럽게 이어지는 데일리 유틸리티 무드. 로고 포인트, 착용감, 수납 디테일을 선명하게 보여준다.",
+    field: "블랙/크림 컬러는 디테일 컷 우선. 숏폼은 착용 전환, 스트랩 조절, 내부 수납 순서로 촬영.",
+  },
+  products: [
+    { id: "bag-001", name: "룬 벨로 호보백 미디움", englishName: "Lune Velo Hobo Bag Medium", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-002", name: "룬 벨로 호보백 미디움", englishName: "Lune Velo Hobo Bag Medium", color: "다크브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-003", name: "룬 벨로 호보백 미디움", englishName: "Lune Velo Hobo Bag Medium", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-004", name: "룬 벨로 호보백 미디움", englishName: "Lune Velo Hobo Bag Medium", color: "아이보리", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-005", name: "룬 벨로 호보백 스몰", englishName: "Lune Velo Hobo Bag Small", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-006", name: "룬 벨로 호보백 스몰", englishName: "Lune Velo Hobo Bag Small", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-007", name: "룬 벨로 호보백 스몰", englishName: "Lune Velo Hobo Bag Small", color: "그레이", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-008", name: "룬 벨로 호보백 스몰", englishName: "Lune Velo Hobo Bag Small", color: "아이보리", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-009", name: "룬 벨로 호보백 라지", englishName: "Lune Velo Hobo Bag Large", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-010", name: "룬 벨로 호보백 라지", englishName: "Lune Velo Hobo Bag Large", color: "다크브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-011", name: "미렐 버킷백 스몰", englishName: "Mirel Bucket Bag Small", color: "아이보리", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-012", name: "미렐 버킷백 스몰", englishName: "Mirel Bucket Bag Small", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-013", name: "미렐 버킷백 스몰", englishName: "Mirel Bucket Bag Small", color: "핑크", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-014", name: "미렐 버킷백 스몰", englishName: "Mirel Bucket Bag Small", color: "스카이블루", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-015", name: "미렐 버킷백 미디움", englishName: "Mirel Bucket Bag Medium", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-016", name: "미렐 버킷백 미디움", englishName: "Mirel Bucket Bag Medium", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-017", name: "셀레 드로우 스트링 백팩 미디움", englishName: "Sele Drawstring Backpack Medium", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-018", name: "셀레 드로우 스트링 백팩 미디움", englishName: "Sele Drawstring Backpack Medium", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-019", name: "세누아 플랩 크로스백 미니", englishName: "Senoir Flap Cross Bag Mini", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-020", name: "세누아 플랩 크로스백 미니", englishName: "Senoir Flap Cross Bag Mini", color: "아이보리", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-021", name: "세누아 플랩 크로스백 미니", englishName: "Senoir Flap Cross Bag Mini", color: "핑크", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-022", name: "세누아 플랩 크로스백 미니", englishName: "Senoir Flap Cross Bag Mini", color: "스카이블루", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-023", name: "세누아 플랩 크로스백 스몰", englishName: "Senoir Flap Cross Bag Small", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-024", name: "세누아 플랩 크로스백 스몰", englishName: "Senoir Flap Cross Bag Small", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-025", name: "세누아 플랩 크로스백 스몰", englishName: "Senoir Flap Cross Bag Small", color: "아이보리", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-026", name: "비나 숄더백 미디움", englishName: "Vina Shoulder Bag Medium", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-027", name: "비나 숄더백 미디움", englishName: "Vina Shoulder Bag Medium", color: "다크브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-028", name: "비나 숄더백 미디움", englishName: "Vina Shoulder Bag Medium", color: "그레이", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-029", name: "셀론 쇼퍼백 라지", englishName: "Selon Shopper Bag Large", color: "블랙", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-030", name: "셀론 쇼퍼백 라지", englishName: "Selon Shopper Bag Large", color: "브라운", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+    { id: "bag-031", name: "셀론 쇼퍼백 라지", englishName: "Selon Shopper Bag Large", color: "그레이", priority: "높음", shootDone: false, point: "촬영 기본 리스트", styling: "" },
+  ],
+  shots: [],
+};
+
+let state = loadLocalState();
+let editingProductId = null;
+let editingShotId = null;
+let isSaving = false;
+
+function cloneData(data) {
+  return JSON.parse(JSON.stringify(data));
+}
+
+function normalizeState(data) {
+  if (!data || !Array.isArray(data.products) || data.products.length === 0) {
+    return cloneData(demoState);
+  }
+
+  const next = {
+    ...cloneData(demoState),
+    ...(data || {}),
+    checks: {
+      ...demoState.checks,
+      ...((data && data.checks) || {}),
+    },
+    notes: {
+      ...demoState.notes,
+      ...((data && data.notes) || {}),
+    },
+    products: Array.isArray(data && data.products) ? data.products : cloneData(demoState.products),
+    shots: Array.isArray(data && data.shots) ? data.shots : cloneData(demoState.shots),
+  };
+
+  next.products = next.products.map((product) => ({
+    ...product,
+    shootDone: Boolean(product.shootDone),
+  }));
+
+  return next;
+}
+
+function loadLocalState() {
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (!saved) return cloneData(demoState);
+
+    return normalizeState(JSON.parse(saved));
+  } catch {
+    return cloneData(demoState);
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch {
+    // Some shared-file contexts block local storage. Keep the current session working.
+  }
+
+  saveSharedState();
+}
+
+function uid(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function productName(productId) {
+  const product = state.products.find((item) => item.id === productId);
+  return product ? product.name : "제품 미지정";
+}
+
+function render() {
+  renderDashboard();
+  renderProducts();
+  renderShotProductOptions();
+  renderShots();
+  renderNotes();
+  renderChecklist();
+}
+
+function renderDashboard() {
+  const totalProducts = state.products.length;
+  const totalShots = state.shots.length;
+  const doneShots = state.shots.filter((shot) => shot.done).length;
+  const progress = totalShots ? Math.round((doneShots / totalShots) * 100) : 0;
+
+  document.querySelector("#totalProducts").textContent = totalProducts;
+  document.querySelector("#totalShots").textContent = totalShots;
+  document.querySelector("#doneShots").textContent = doneShots;
+  document.querySelector("#progressText").textContent = `${progress}%`;
+  document.querySelector("#remainingText").textContent = `남은 컷 ${totalShots - doneShots}개`;
+  document.querySelector("#progressBar").style.width = `${progress}%`;
+
+  const priorityProducts = state.products
+    .filter((product) => product.priority === "높음")
+    .map((product) => {
+      const productShots = state.shots.filter((shot) => shot.productId === product.id);
+      const done = productShots.filter((shot) => shot.done).length;
+      return `
+        <div class="priority-item high">
+          <strong>${product.name}</strong>
+          <span class="row-sub">${product.color || "컬러 미정"} · ${done}/${productShots.length}컷 완료 · ${product.point || "포인트 미정"}</span>
+        </div>
+      `;
+    });
+
+  document.querySelector("#priorityList").innerHTML =
+    priorityProducts.join("") || '<div class="priority-item">높은 우선순위 제품이 아직 없습니다.</div>';
+}
+
+function renderProducts() {
+  document.querySelector("#productList").innerHTML = state.products
+    .map((product, index) => {
+      if (product.id === editingProductId) {
+        return `
+          <form class="table-row edit-row" data-product-edit="${product.id}">
+            <label>제품명<input name="name" required value="${escapeHtml(product.name)}" /></label>
+            <label>영문명<input name="englishName" value="${escapeHtml(product.englishName || "")}" /></label>
+            <label>컬러<input name="color" value="${escapeHtml(product.color || "")}" /></label>
+            <label>우선순위
+              <select name="priority">
+                ${["높음", "보통", "낮음"]
+                  .map((priority) => `<option ${product.priority === priority ? "selected" : ""}>${priority}</option>`)
+                  .join("")}
+              </select>
+            </label>
+            <label>핵심 포인트<input name="point" value="${escapeHtml(product.point || "")}" /></label>
+            <label>스타일링<input name="styling" value="${escapeHtml(product.styling || "")}" /></label>
+            <label class="inline-check"><input type="checkbox" name="shootDone" ${product.shootDone ? "checked" : ""} /> 촬영완료</label>
+            <div class="row-actions">
+              <button type="submit" class="small-button dark">저장</button>
+              <button type="button" class="small-button" data-cancel-product-edit>취소</button>
+            </div>
+          </form>
+        `;
+      }
+
+      return `
+        <article class="table-row ${product.shootDone ? "shoot-done" : ""}">
+          <div>
+            <div class="row-title">${product.name}</div>
+            <div class="row-sub">${product.englishName || product.point || "핵심 포인트 미정"}</div>
+          </div>
+          <span>${product.color || "컬러 미정"}</span>
+          <span class="tag ${product.priority === "높음" ? "high" : ""}">${product.priority}</span>
+          <label class="inline-check"><input type="checkbox" data-toggle-product-done="${product.id}" ${product.shootDone ? "checked" : ""} /> 촬영완료</label>
+          <span class="row-sub">${product.styling || "스타일링 미정"}</span>
+          <div class="row-actions">
+            <button class="icon-button" aria-label="위로 이동" data-move-product="${product.id}" data-direction="up" ${index === 0 ? "disabled" : ""}>↑</button>
+            <button class="icon-button" aria-label="아래로 이동" data-move-product="${product.id}" data-direction="down" ${index === state.products.length - 1 ? "disabled" : ""}>↓</button>
+            <button class="small-button" data-edit-product="${product.id}">수정</button>
+            <button class="delete-button" aria-label="제품 삭제" data-delete-product="${product.id}">×</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderShotProductOptions() {
+  const select = document.querySelector("#shotProduct");
+  select.innerHTML = state.products
+    .map((product) => `<option value="${product.id}">${product.name}</option>`)
+    .join("");
+}
+
+function renderShots() {
+  document.querySelector("#shotList").innerHTML = state.shots
+    .map((shot) => {
+      if (shot.id === editingShotId) {
+        return `
+          <form class="shot-card edit-shot" data-shot-edit="${shot.id}">
+            <label>제품
+              <select name="productId">
+                ${state.products
+                  .map(
+                    (product) =>
+                      `<option value="${product.id}" ${product.id === shot.productId ? "selected" : ""}>${product.name}</option>`,
+                  )
+                  .join("")}
+              </select>
+            </label>
+            <label>컷 타입
+              <select name="type">
+                ${["착용 컷", "디테일 컷", "누끼 컷", "무드 컷", "릴스 컷"]
+                  .map((type) => `<option ${shot.type === type ? "selected" : ""}>${type}</option>`)
+                  .join("")}
+              </select>
+            </label>
+            <label>장면<input name="scene" value="${escapeHtml(shot.scene || "")}" /></label>
+            <label><input type="checkbox" name="done" ${shot.done ? "checked" : ""} /> 완료</label>
+            <div class="row-actions">
+              <button type="submit" class="small-button dark">저장</button>
+              <button type="button" class="small-button" data-cancel-shot-edit>취소</button>
+            </div>
+          </form>
+        `;
+      }
+
+      return `
+        <article class="shot-card ${shot.done ? "done" : ""}">
+          <label>
+            <input type="checkbox" data-toggle-shot="${shot.id}" ${shot.done ? "checked" : ""} />
+            <strong>${shot.type}</strong>
+          </label>
+          <div>${shot.scene || "장면 미정"}</div>
+          <div class="shot-meta">${productName(shot.productId)}</div>
+          <div class="row-actions">
+            <button class="small-button" data-edit-shot="${shot.id}">수정</button>
+            <button class="delete-button" aria-label="컷 삭제" data-delete-shot="${shot.id}">×</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .split("&")
+    .join("&amp;")
+    .split('"')
+    .join("&quot;")
+    .split("<")
+    .join("&lt;")
+    .split(">")
+    .join("&gt;");
+}
+
+function renderNotes() {
+  document.querySelector("#shootDate").value = state.shootDate || "";
+  document.querySelector("#conceptNote").value = state.notes.concept || "";
+  document.querySelector("#fieldNote").value = state.notes.field || "";
+}
+
+function renderChecklist() {
+  document.querySelectorAll("[data-check]").forEach((input) => {
+    input.checked = Boolean(state.checks[input.dataset.check]);
+  });
+}
+
+async function loadSharedState() {
+  if (!canUseSharedServer) return;
+
+  try {
+    const response = await fetch("/api/state", { cache: "no-store" });
+    if (!response.ok) return;
+
+    const sharedState = await response.json();
+    state = normalizeState(sharedState);
+    localStorage.setItem(storageKey, JSON.stringify(state));
+    render();
+  } catch {
+    // Shared mode is optional. The app still works locally if the server is unavailable.
+  }
+}
+
+async function saveSharedState() {
+  if (!canUseSharedServer || isSaving) return;
+
+  isSaving = true;
+
+  try {
+    await fetch("/api/state", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(state),
+    });
+  } catch {
+    // Keep local changes available even if the shared server drops briefly.
+  } finally {
+    isSaving = false;
+  }
+}
+
+function startSharedSync() {
+  if (!canUseSharedServer) return;
+
+  window.setInterval(() => {
+    if (editingProductId || editingShotId || isSaving) return;
+    loadSharedState();
+  }, 3000);
+}
+
+function setView(viewName) {
+  const target = document.querySelector(`#${viewName}View`);
+  if (!target) return;
+
+  document.querySelectorAll(".nav-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.view === viewName);
+  });
+  document.querySelectorAll(".view").forEach((view) => {
+    view.classList.remove("active");
+  });
+  target.classList.add("active");
+}
+
+function exportCsv() {
+  const rows = [["제품명", "영문명", "컬러", "우선순위", "제품 촬영완료", "컷 타입", "장면", "컷 완료 여부", "핵심 포인트", "스타일링"]];
+
+  state.products.forEach((product) => {
+    const productShots = state.shots.filter((shot) => shot.productId === product.id);
+
+    if (!productShots.length) {
+      rows.push([
+        product.name || "",
+        product.englishName || "",
+        product.color || "",
+        product.priority || "",
+        product.shootDone ? "완료" : "미완료",
+        "",
+        "",
+        "",
+        product.point || "",
+        product.styling || "",
+      ]);
+    }
+
+    productShots.forEach((shot) => {
+      rows.push([
+        product.name || "",
+        product.englishName || "",
+        product.color || "",
+        product.priority || "",
+        product.shootDone ? "완료" : "미완료",
+        shot.type,
+        shot.scene,
+        shot.done ? "완료" : "미완료",
+        product.point || "",
+        product.styling || "",
+      ]);
+    });
+  });
+
+  const csv = rows
+    .map((row) => row.map((value) => `"${String(value).split('"').join('""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "varzar-bag-shoot-list.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadTextFile(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportBackup() {
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    state,
+  };
+
+  downloadTextFile("varzar-shoot-backup.json", JSON.stringify(backup, null, 2), "application/json;charset=utf-8");
+}
+
+function importBackupFile(file) {
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || "{}"));
+      state = normalizeState(parsed.state || parsed);
+      editingProductId = null;
+      editingShotId = null;
+      saveState();
+      render();
+    } catch {
+      window.alert("백업 파일을 불러오지 못했습니다.");
+    }
+  });
+  reader.readAsText(file);
+}
+
+document.querySelectorAll(".nav-tab").forEach((tab) => {
+  tab.addEventListener("click", (event) => {
+    setView(tab.dataset.view);
+  });
+});
+
+document.querySelector("#productForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const name = form.get("name").trim();
+
+  if (!name) return;
+
+  state.products.push({
+    id: uid("p"),
+    name,
+    englishName: "",
+    color: form.get("color").trim(),
+    priority: form.get("priority"),
+    shootDone: false,
+    point: form.get("point").trim(),
+    styling: form.get("styling").trim(),
+  });
+  event.currentTarget.reset();
+  saveState();
+  render();
+});
+
+document.querySelector("#shotForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  state.shots.push({
+    id: uid("s"),
+    productId: form.get("productId"),
+    type: form.get("type"),
+    scene: form.get("scene").trim(),
+    done: false,
+  });
+  event.currentTarget.reset();
+  saveState();
+  render();
+});
+
+document.addEventListener("click", (event) => {
+  const productId = event.target.dataset.deleteProduct;
+  const shotId = event.target.dataset.deleteShot;
+  const editProductId = event.target.dataset.editProduct;
+  const editShotId = event.target.dataset.editShot;
+  const moveProductId = event.target.dataset.moveProduct;
+  const moveDirection = event.target.dataset.direction;
+
+  if (moveProductId) {
+    const currentIndex = state.products.findIndex((product) => product.id === moveProductId);
+    const nextIndex = moveDirection === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex >= 0 && nextIndex >= 0 && nextIndex < state.products.length) {
+      const [product] = state.products.splice(currentIndex, 1);
+      state.products.splice(nextIndex, 0, product);
+      saveState();
+      render();
+    }
+
+    return;
+  }
+
+  if (editProductId) {
+    editingProductId = editProductId;
+    editingShotId = null;
+    render();
+    return;
+  }
+
+  if (editShotId) {
+    editingShotId = editShotId;
+    editingProductId = null;
+    render();
+    return;
+  }
+
+  if (event.target.dataset.cancelProductEdit !== undefined) {
+    editingProductId = null;
+    render();
+    return;
+  }
+
+  if (event.target.dataset.cancelShotEdit !== undefined) {
+    editingShotId = null;
+    render();
+    return;
+  }
+
+  if (productId) {
+    state.products = state.products.filter((product) => product.id !== productId);
+    state.shots = state.shots.filter((shot) => shot.productId !== productId);
+    if (editingProductId === productId) editingProductId = null;
+  }
+
+  if (shotId) {
+    state.shots = state.shots.filter((shot) => shot.id !== shotId);
+    if (editingShotId === shotId) editingShotId = null;
+  }
+
+  if (productId || shotId) {
+    saveState();
+    render();
+  }
+});
+
+document.addEventListener("submit", (event) => {
+  const productEditId = event.target.dataset.productEdit;
+  const shotEditId = event.target.dataset.shotEdit;
+
+  if (productEditId) {
+    event.preventDefault();
+    const product = state.products.find((item) => item.id === productEditId);
+    const form = new FormData(event.target);
+
+    if (product) {
+      product.name = form.get("name").trim();
+      product.englishName = form.get("englishName").trim();
+      product.color = form.get("color").trim();
+      product.priority = form.get("priority");
+      product.shootDone = form.get("shootDone") === "on";
+      product.point = form.get("point").trim();
+      product.styling = form.get("styling").trim();
+    }
+
+    editingProductId = null;
+    saveState();
+    render();
+  }
+
+  if (shotEditId) {
+    event.preventDefault();
+    const shot = state.shots.find((item) => item.id === shotEditId);
+    const form = new FormData(event.target);
+
+    if (shot) {
+      shot.productId = form.get("productId");
+      shot.type = form.get("type");
+      shot.scene = form.get("scene").trim();
+      shot.done = form.get("done") === "on";
+    }
+
+    editingShotId = null;
+    saveState();
+    render();
+  }
+});
+
+document.addEventListener("change", (event) => {
+  const shotId = event.target.dataset.toggleShot;
+  const checkName = event.target.dataset.check;
+  const productDoneId = event.target.dataset.toggleProductDone;
+
+  if (shotId) {
+    const shot = state.shots.find((item) => item.id === shotId);
+    if (shot) shot.done = event.target.checked;
+  }
+
+  if (checkName) {
+    state.checks[checkName] = event.target.checked;
+  }
+
+  if (productDoneId) {
+    const product = state.products.find((item) => item.id === productDoneId);
+    if (product) product.shootDone = event.target.checked;
+  }
+
+  if (shotId || checkName || productDoneId) {
+    saveState();
+    render();
+  }
+});
+
+document.querySelector("#shootDate").addEventListener("input", (event) => {
+  state.shootDate = event.target.value;
+  saveState();
+});
+
+document.querySelector("#conceptNote").addEventListener("input", (event) => {
+  state.notes.concept = event.target.value;
+  saveState();
+});
+
+document.querySelector("#fieldNote").addEventListener("input", (event) => {
+  state.notes.field = event.target.value;
+  saveState();
+});
+
+document.querySelector("#exportCsv").addEventListener("click", exportCsv);
+document.querySelector("#exportBackup").addEventListener("click", exportBackup);
+document.querySelector("#importBackup").addEventListener("click", () => {
+  document.querySelector("#backupFile").click();
+});
+document.querySelector("#backupFile").addEventListener("change", (event) => {
+  importBackupFile(event.target.files[0]);
+  event.target.value = "";
+});
+
+document.querySelector("#resetDemo").addEventListener("click", () => {
+  state = cloneData(demoState);
+  saveState();
+  render();
+});
+
+render();
+loadSharedState();
+startSharedSync();
+
+
+
+    </script>
+  </body>
+</html>

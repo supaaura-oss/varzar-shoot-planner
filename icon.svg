@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#272723"/>
+  <path d="M156 175h200c32 0 58 26 58 58v120c0 42-34 76-76 76H174c-42 0-76-34-76-76V233c0-32 26-58 58-58Z" fill="#fbfaf7"/>
+  <path d="M178 174c0-46 35-83 78-83s78 37 78 83" fill="none" stroke="#fbfaf7" stroke-width="34" stroke-linecap="round"/>
+  <path d="M171 280h170" stroke="#272723" stroke-width="22" stroke-linecap="round"/>
+  <path d="M171 329h112" stroke="#656f4f" stroke-width="22" stroke-linecap="round"/>
+  <text x="256" y="244" text-anchor="middle" font-family="Arial, sans-serif" font-size="46" font-weight="800" fill="#272723">VZ</text>
+</svg>
