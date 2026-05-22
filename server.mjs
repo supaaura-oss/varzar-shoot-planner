@@ -60,10 +60,10 @@ async function handleStateApi(request, response) {
     return;
   }
 
-  await sendJson(response, 405, { ok: false });
+  await sendJson(response, 405, { ok: false, error: "Method not allowed" });
 }
 
-async function serveStatic(request, response) {
+async function handleStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
   const safePath = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
@@ -94,9 +94,9 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  await serveStatic(request, response);
+  await handleStatic(request, response);
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`VARZAR shoot planner is running at http://localhost:${port}`);
+  console.log(`VARZAR shoot planner running on http://0.0.0.0:${port}`);
 });
