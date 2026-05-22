@@ -323,7 +323,7 @@ body:has(.view:target) .view.active:not(:target) {
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
 }
 
@@ -351,12 +351,60 @@ textarea {
 }
 
 .table-row {
-  grid-template-columns: minmax(190px, 1fr) 110px 100px 120px minmax(160px, 1fr) 104px;
+  grid-template-columns: 72px 76px minmax(210px, 1.2fr) 90px 86px 118px minmax(180px, 0.9fr) minmax(120px, 0.7fr) 104px;
   align-items: center;
 }
 
 .table-row.edit-row {
-  grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(110px, 0.6fr) minmax(100px, 0.55fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) 120px auto;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  align-items: end;
+}
+
+.table-row.edit-row .row-actions {
+  grid-column: 1 / -1;
+}
+
+.product-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.product-sort-tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.sort-tab {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.sort-tab.active {
+  background: var(--charcoal);
+  color: white;
+}
+
+.shoot-order-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  min-height: 34px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink);
+  font-weight: 800;
 }
 
 .table-row.shoot-done {
@@ -388,6 +436,63 @@ textarea {
 
 .row-title {
   font-weight: 800;
+}
+
+.product-thumb,
+.styling-thumb {
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--soft);
+}
+
+.product-thumb img,
+.styling-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.image-empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.styling-cell {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.styling-thumb {
+  width: 48px;
+  height: 48px;
+}
+
+.image-control {
+  display: grid;
+  gap: 8px;
+}
+
+.image-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+}
+
+.image-preview .inline-check {
+  min-height: 28px;
+  font-weight: 600;
 }
 
 .row-sub,
@@ -599,7 +704,7 @@ textarea {
               <strong id="totalShots">0</strong>
             </article>
             <article class="metric-card">
-              <span>완료 컷</span>
+              <span>완료 제품</span>
               <strong id="doneShots">0</strong>
             </article>
             <article class="metric-card accent">
@@ -612,7 +717,7 @@ textarea {
             <section class="panel">
               <div class="panel-header">
                 <h2>촬영 진행률</h2>
-                <span id="remainingText">남은 컷 0개</span>
+                <span id="remainingText">남은 제품 0개</span>
               </div>
               <div class="progress-track">
                 <div id="progressBar" class="progress-bar"></div>
@@ -639,6 +744,7 @@ textarea {
           <form id="productForm" class="editor-form">
             <div class="form-row">
               <label>제품명<input name="name" required placeholder="예: VA 스터드 미니 백 블랙" /></label>
+              <label>촬영순서<input name="shootOrder" type="number" min="1" step="1" placeholder="예: 1" /></label>
               <label>컬러<input name="color" placeholder="블랙" /></label>
               <label>우선순위
                 <select name="priority">
@@ -651,9 +757,22 @@ textarea {
             <div class="form-row">
               <label>핵심 포인트<input name="point" placeholder="수납, 스트랩, 로고 장식 등" /></label>
               <label>스타일링<input name="styling" placeholder="데님 셋업, 미니멀 룩 등" /></label>
+              <label>제품 이미지<input name="imageFile" type="file" accept="image/*" /></label>
+              <label>스타일링 이미지<input name="stylingImageFile" type="file" accept="image/*" /></label>
               <button type="submit" class="primary-button">제품 추가</button>
             </div>
           </form>
+
+          <div class="product-toolbar">
+            <div>
+              <h2>제품 리스트</h2>
+              <span class="row-sub">촬영순서 입력값 기준으로 정렬됩니다.</span>
+            </div>
+            <div class="product-sort-tabs" aria-label="제품 정렬 방식">
+              <button class="sort-tab active" type="button" data-product-sort="shootOrder">촬영순서순</button>
+              <button class="sort-tab" type="button" data-product-sort="styling">스타일링순</button>
+            </div>
+          </div>
 
           <div id="productList" class="table-list">
         <article class="table-row">
@@ -1249,6 +1368,7 @@ let state = loadLocalState();
 let editingProductId = null;
 let editingShotId = null;
 let isSaving = false;
+let productSortMode = "shootOrder";
 
 function cloneData(data) {
   return JSON.parse(JSON.stringify(data));
@@ -1274,9 +1394,12 @@ function normalizeState(data) {
     shots: Array.isArray(data && data.shots) ? data.shots : cloneData(demoState.shots),
   };
 
-  next.products = next.products.map((product) => ({
+  next.products = next.products.map((product, index) => ({
     ...product,
+    shootOrder: Number.isFinite(Number(product.shootOrder)) && Number(product.shootOrder) > 0 ? Number(product.shootOrder) : index + 1,
     shootDone: Boolean(product.shootDone),
+    imageData: product.imageData || "",
+    stylingImageData: product.stylingImageData || "",
   }));
 
   return next;
@@ -1312,6 +1435,77 @@ function productName(productId) {
   return product ? product.name : "제품 미지정";
 }
 
+function getProductIndex(productId) {
+  return state.products.findIndex((product) => product.id === productId);
+}
+
+function getOrderedProducts() {
+  return state.products
+    .map((product, index) => ({ product, index }))
+    .sort((a, b) => {
+      if (productSortMode === "styling") {
+        const stylingCompare = String(a.product.styling || "스타일링 미정").localeCompare(String(b.product.styling || "스타일링 미정"), "ko");
+        if (stylingCompare !== 0) return stylingCompare;
+      }
+
+      const orderCompare = Number(a.product.shootOrder || a.index + 1) - Number(b.product.shootOrder || b.index + 1);
+      if (orderCompare !== 0) return orderCompare;
+      return a.index - b.index;
+    });
+}
+
+function normalizeShootOrders() {
+  getOrderedProducts().forEach(({ product }, index) => {
+    product.shootOrder = index + 1;
+  });
+}
+
+function renderThumb(src, label) {
+  if (!src) {
+    return `<div class="image-empty">${label}</div>`;
+  }
+
+  return `<img src="${src}" alt="${label}" loading="lazy" />`;
+}
+
+function resizeImageData(dataUrl, maxSize = 1200) {
+  return new Promise((resolve) => {
+    const image = new Image();
+
+    image.addEventListener("load", () => {
+      const ratio = Math.min(1, maxSize / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * ratio));
+      const height = Math.max(1, Math.round(image.height * ratio));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", 0.84));
+    });
+
+    image.addEventListener("error", () => resolve(dataUrl));
+    image.src = dataUrl;
+  });
+}
+
+function readImageFile(file) {
+  if (!file || !file.size) return Promise.resolve("");
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", async () => {
+      try {
+        resolve(await resizeImageData(String(reader.result || "")));
+      } catch {
+        resolve(String(reader.result || ""));
+      }
+    });
+    reader.addEventListener("error", reject);
+    reader.readAsDataURL(file);
+  });
+}
+
 function render() {
   renderDashboard();
   renderProducts();
@@ -1323,15 +1517,16 @@ function render() {
 
 function renderDashboard() {
   const totalProducts = state.products.length;
+  const doneProducts = state.products.filter((product) => product.shootDone).length;
   const totalShots = state.shots.length;
   const doneShots = state.shots.filter((shot) => shot.done).length;
-  const progress = totalShots ? Math.round((doneShots / totalShots) * 100) : 0;
+  const progress = totalProducts ? Math.round((doneProducts / totalProducts) * 100) : 0;
 
   document.querySelector("#totalProducts").textContent = totalProducts;
   document.querySelector("#totalShots").textContent = totalShots;
-  document.querySelector("#doneShots").textContent = doneShots;
+  document.querySelector("#doneShots").textContent = doneProducts;
   document.querySelector("#progressText").textContent = `${progress}%`;
-  document.querySelector("#remainingText").textContent = `남은 컷 ${totalShots - doneShots}개`;
+  document.querySelector("#remainingText").textContent = `남은 제품 ${totalProducts - doneProducts}개 · 컷 ${doneShots}/${totalShots}`;
   document.querySelector("#progressBar").style.width = `${progress}%`;
 
   const priorityProducts = state.products
@@ -1342,7 +1537,7 @@ function renderDashboard() {
       return `
         <div class="priority-item high">
           <strong>${product.name}</strong>
-          <span class="row-sub">${product.color || "컬러 미정"} · ${done}/${productShots.length}컷 완료 · ${product.point || "포인트 미정"}</span>
+          <span class="row-sub">${product.color || "컬러 미정"} · ${product.shootDone ? "촬영완료" : "촬영대기"} · 컷 ${done}/${productShots.length} · ${product.point || "포인트 미정"}</span>
         </div>
       `;
     });
@@ -1352,13 +1547,20 @@ function renderDashboard() {
 }
 
 function renderProducts() {
-  document.querySelector("#productList").innerHTML = state.products
-    .map((product, index) => {
+  document.querySelectorAll("[data-product-sort]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.productSort === productSortMode);
+  });
+
+  const orderedProducts = getOrderedProducts();
+
+  document.querySelector("#productList").innerHTML = orderedProducts
+    .map(({ product }, index) => {
       if (product.id === editingProductId) {
         return `
           <form class="table-row edit-row" data-product-edit="${product.id}">
             <label>제품명<input name="name" required value="${escapeHtml(product.name)}" /></label>
             <label>영문명<input name="englishName" value="${escapeHtml(product.englishName || "")}" /></label>
+            <label>촬영순서<input name="shootOrder" type="number" min="1" step="1" value="${escapeHtml(product.shootOrder || index + 1)}" /></label>
             <label>컬러<input name="color" value="${escapeHtml(product.color || "")}" /></label>
             <label>우선순위
               <select name="priority">
@@ -1369,6 +1571,20 @@ function renderProducts() {
             </label>
             <label>핵심 포인트<input name="point" value="${escapeHtml(product.point || "")}" /></label>
             <label>스타일링<input name="styling" value="${escapeHtml(product.styling || "")}" /></label>
+            <label class="image-control">제품 이미지
+              <input name="imageFile" type="file" accept="image/*" />
+              <span class="image-preview">
+                <span class="product-thumb">${renderThumb(product.imageData, "제품")}</span>
+                <label class="inline-check"><input type="checkbox" name="removeImage" /> 삭제</label>
+              </span>
+            </label>
+            <label class="image-control">스타일링 이미지
+              <input name="stylingImageFile" type="file" accept="image/*" />
+              <span class="image-preview">
+                <span class="styling-thumb">${renderThumb(product.stylingImageData, "스타일")}</span>
+                <label class="inline-check"><input type="checkbox" name="removeStylingImage" /> 삭제</label>
+              </span>
+            </label>
             <label class="inline-check"><input type="checkbox" name="shootDone" ${product.shootDone ? "checked" : ""} /> 촬영완료</label>
             <div class="row-actions">
               <button type="submit" class="small-button dark">저장</button>
@@ -1380,6 +1596,8 @@ function renderProducts() {
 
       return `
         <article class="table-row ${product.shootDone ? "shoot-done" : ""}">
+          <span class="shoot-order-badge">${product.shootOrder || index + 1}</span>
+          <div class="product-thumb">${renderThumb(product.imageData, "제품")}</div>
           <div>
             <div class="row-title">${product.name}</div>
             <div class="row-sub">${product.englishName || product.point || "핵심 포인트 미정"}</div>
@@ -1387,10 +1605,13 @@ function renderProducts() {
           <span>${product.color || "컬러 미정"}</span>
           <span class="tag ${product.priority === "높음" ? "high" : ""}">${product.priority}</span>
           <label class="inline-check"><input type="checkbox" data-toggle-product-done="${product.id}" ${product.shootDone ? "checked" : ""} /> 촬영완료</label>
-          <span class="row-sub">${product.styling || "스타일링 미정"}</span>
+          <div class="styling-cell">
+            <span class="styling-thumb">${renderThumb(product.stylingImageData, "스타일")}</span>
+            <span class="row-sub">${product.styling || "스타일링 미정"}</span>
+          </div>
           <div class="row-actions">
             <button class="icon-button" aria-label="위로 이동" data-move-product="${product.id}" data-direction="up" ${index === 0 ? "disabled" : ""}>↑</button>
-            <button class="icon-button" aria-label="아래로 이동" data-move-product="${product.id}" data-direction="down" ${index === state.products.length - 1 ? "disabled" : ""}>↓</button>
+            <button class="icon-button" aria-label="아래로 이동" data-move-product="${product.id}" data-direction="down" ${index === orderedProducts.length - 1 ? "disabled" : ""}>↓</button>
             <button class="small-button" data-edit-product="${product.id}">수정</button>
             <button class="delete-button" aria-label="제품 삭제" data-delete-product="${product.id}">×</button>
           </div>
@@ -1633,7 +1854,14 @@ document.querySelectorAll(".nav-tab").forEach((tab) => {
   });
 });
 
-document.querySelector("#productForm").addEventListener("submit", (event) => {
+document.querySelectorAll("[data-product-sort]").forEach((button) => {
+  button.addEventListener("click", () => {
+    productSortMode = button.dataset.productSort || "shootOrder";
+    renderProducts();
+  });
+});
+
+document.querySelector("#productForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = new FormData(event.currentTarget);
   const name = form.get("name").trim();
@@ -1644,11 +1872,14 @@ document.querySelector("#productForm").addEventListener("submit", (event) => {
     id: uid("p"),
     name,
     englishName: "",
+    shootOrder: Number(form.get("shootOrder")) || state.products.length + 1,
     color: form.get("color").trim(),
     priority: form.get("priority"),
     shootDone: false,
     point: form.get("point").trim(),
     styling: form.get("styling").trim(),
+    imageData: await readImageFile(form.get("imageFile")),
+    stylingImageData: await readImageFile(form.get("stylingImageFile")),
   });
   event.currentTarget.reset();
   saveState();
@@ -1679,12 +1910,17 @@ document.addEventListener("click", (event) => {
   const moveDirection = event.target.dataset.direction;
 
   if (moveProductId) {
-    const currentIndex = state.products.findIndex((product) => product.id === moveProductId);
+    const orderedProducts = getOrderedProducts();
+    const currentIndex = orderedProducts.findIndex(({ product }) => product.id === moveProductId);
     const nextIndex = moveDirection === "up" ? currentIndex - 1 : currentIndex + 1;
 
-    if (currentIndex >= 0 && nextIndex >= 0 && nextIndex < state.products.length) {
-      const [product] = state.products.splice(currentIndex, 1);
-      state.products.splice(nextIndex, 0, product);
+    if (currentIndex >= 0 && nextIndex >= 0 && nextIndex < orderedProducts.length) {
+      const currentProduct = orderedProducts[currentIndex].product;
+      const nextProduct = orderedProducts[nextIndex].product;
+      const currentOrder = currentProduct.shootOrder || currentIndex + 1;
+      currentProduct.shootOrder = nextProduct.shootOrder || nextIndex + 1;
+      nextProduct.shootOrder = currentOrder;
+      normalizeShootOrders();
       saveState();
       render();
     }
@@ -1735,7 +1971,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("submit", (event) => {
+document.addEventListener("submit", async (event) => {
   const productEditId = event.target.dataset.productEdit;
   const shotEditId = event.target.dataset.shotEdit;
 
@@ -1747,11 +1983,19 @@ document.addEventListener("submit", (event) => {
     if (product) {
       product.name = form.get("name").trim();
       product.englishName = form.get("englishName").trim();
+      product.shootOrder = Number(form.get("shootOrder")) || product.shootOrder || getProductIndex(product.id) + 1;
       product.color = form.get("color").trim();
       product.priority = form.get("priority");
       product.shootDone = form.get("shootDone") === "on";
       product.point = form.get("point").trim();
       product.styling = form.get("styling").trim();
+      if (form.get("removeImage") === "on") product.imageData = "";
+      if (form.get("removeStylingImage") === "on") product.stylingImageData = "";
+
+      const imageData = await readImageFile(form.get("imageFile"));
+      const stylingImageData = await readImageFile(form.get("stylingImageFile"));
+      if (imageData) product.imageData = imageData;
+      if (stylingImageData) product.stylingImageData = stylingImageData;
     }
 
     editingProductId = null;
